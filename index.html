@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مفاجأة آية الأسطورية ✨</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@900&family=Pacifico&display=swap');
+        :root { --pink-main: #ff2d55; --gold: #ffd700; --bg: #050505; }
+        body { margin: 0; height: 100vh; background-color: var(--bg); font-family: 'Cairo', sans-serif; overflow: hidden; color: white; }
+        #stars { position: fixed; inset: 0; background: radial-gradient(circle at center, #1a0a1a 0%, #000 100%); z-index: 0; }
+        .container { position: relative; z-index: 10; text-align: center; width: 90%; max-width: 500px; margin: 0 auto; top: 50%; transform: translateY(-50%); }
+        .screen { display: none; animation: fadeIn 0.8s forwards; }
+        .active { display: block; }
+        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 2px solid var(--pink-main); border-radius: 25px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn { background: linear-gradient(45deg, var(--pink-main), #ff7eb3); color: white; border: none; padding: 15px 45px; font-size: 1.3rem; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px var(--pink-main); margin-top: 20px; transition: 0.3s; }
+        
+        /* لعبة الأحجية */
+        .puzzle-grid { width: 210px; height: 210px; margin: 20px auto; border: 4px solid var(--gold); display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; background: rgba(0,0,0,0.4); padding: 5px; direction: ltr; }
+        .slot { width: 100px; height: 100px; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.1); }
+        .piece { width: 100px; height: 100px; background-size: 200px 200px; cursor: pointer; border: 1px solid var(--gold); transition: 0.3s; }
+        .piece.selected { border: 4px solid white; box-shadow: 0 0 20px white; transform: scale(1.1); z-index: 100; }
+
+        /* شاشة الفيديو */
+        #videoScreen { position: fixed; inset: 0; background: black; z-index: 2000; display: none; align-items: center; justify-content: center; }
+        #memoryVideo { width: 100%; height: 100%; object-fit: contain; }
+
+        /* العرض النهائي */
+        #finalScene { position: fixed; inset: 0; background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 50%, #764ba2 100%); z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .photo-frame { width: 280px; height: 280px; padding: 10px; background: white; border-radius: 50%; box-shadow: 0 0 60px white; animation: float 4s ease-in-out infinite; }
+        #finalImg { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .white-marquee { position: absolute; bottom: 45px; width: 100%; background: white; padding: 20px 0; overflow: hidden; }
+        .marquee-content { display: inline-block; white-space: nowrap; font-size: 1.8rem; font-weight: 900; color: var(--pink-main); animation: scrollText 20s linear infinite; }
+
+        @keyframes scrollText { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="stars"></div>
+
+    <audio id="audio1" loop src="https://raw.githubusercontent.com/amirrezik982-cmyk/Aya/main/Musicphrase-Jingle-Bells-Ukulele(chosic.com).mp3"></audio> 
+    <audio id="audioBirthday" loop src="https://raw.githubusercontent.com/amirrezik982-cmyk/Aya/main/saavane-happy-birthday-254480.mp3"></audio>
+
+    <div class="container" id="mainContainer">
+        <div id="qScreen" class="screen active">
+            <div class="glass-card"><h2 id="qText">أهلاً بكِ يا آية.. جاهزة للمفاجأة؟ ✨</h2></div>
+            <button class="btn" onclick="nextQ()">هيا بنا! ✅</button>
+        </div>
+
+        <div id="gameScreen" class="screen">
+            <div class="glass-card">
+                <p>جمعي القطع لتكتمل الصورة وتفتح المفاجأة! 🎈</p>
+                <div style="display:flex; justify-content:center; gap:12px; margin:20px 0;">
+                    <div style="width:40px; height:60px; background:var(--pink-main); border-radius:50%; cursor:pointer;" onclick="pop(this, 0)"></div>
+                    <div style="width:40px; height:60px; background:var(--pink-main); border-radius:50%; cursor:pointer;" onclick="pop(this, 1)"></div>
+                    <div style="width:40px; height:60px; background:var(--pink-main); border-radius:50%; cursor:pointer;" onclick="pop(this, 2)"></div>
+                    <div style="width:40px; height:60px; background:var(--pink-main); border-radius:50%; cursor:pointer;" onclick="pop(this, 3)"></div>
+                </div>
+                <div id="tray" style="display:flex; justify-content:center; gap:10px; min-height:100px;"></div>
+                <div class="puzzle-grid">
+                    <div class="slot" onclick="handleSlotClick(0)"></div>
+                    <div class="slot" onclick="handleSlotClick(1)"></div>
+                    <div class="slot" onclick="handleSlotClick(2)"></div>
+                    <div class="slot" onclick="handleSlotClick(3)"></div>
+                </div>
+                <button id="finishBtn" class="btn" style="display: none; background: #2ecc71;" onclick="startVideoStage()">مشاهدة فيديو الذكريات 🎬</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="videoScreen">
+        <video id="memoryVideo">
+            <source src="https://raw.githubusercontent.com/amirrezik982-cmyk/Aya/main/HnVideoEditor_2026_05_09_223222411.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div id="finalScene">
+        <div class="photo-frame"><img id="finalImg" src="https://i.ibb.co/rKFC6w0k/IMG-20260509-214723-792.jpg"></div>
+        <h1 class="birthday-text">Happy Birthday Ayouta 💖</h1>
+        <div class="white-marquee">
+            <div class="marquee-content">كل عام وأنتِ بخير يا أغلى آية في الدنيا.. عيد ميلاد سعيد! ✨ Happy Birthday Aya! ✨ كل سنة وأنتِ طيبة يا أجمل آية🎂🎉</div>
+        </div>
+    </div>
+
+    <script>
+        const imgUrl = "https://i.ibb.co/rKFC6w0k/IMG-20260509-214723-792.jpg";
+        let step = 0, correct = 0, selected = null;
+        const pos = ['0% 0%', '100% 0%', '0% 100%', '100% 100%'];
+
+        function nextQ() {
+            if (step === 0) {
+                document.getElementById('qText').innerText = "هل أنتِ مستعدة لرؤية شيء جميل؟ 💖";
+                document.getElementById('audio1').play();
+                step++;
+            } else {
+                document.getElementById('qScreen').classList.remove('active');
+                document.getElementById('gameScreen').classList.add('active');
+            }
+        }
+
+        function pop(el, i) {
+            el.style.visibility = 'hidden';
+            confetti({ particleCount: 20, origin: { x: el.getBoundingClientRect().left / window.innerWidth, y: 0.3 } });
+            const p = document.createElement('div');
+            p.className = 'piece';
+            p.style.backgroundImage = `url(${imgUrl})`;
+            p.style.backgroundPosition = pos[i];
+            p.onclick = (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.piece').forEach(x => x.classList.remove('selected'));
+                selected = { el: p, i: i };
+                p.classList.add('selected');
+            };
+            document.getElementById('tray').appendChild(p);
+        }
+
+        function handleSlotClick(si) {
+            if (!selected || selected.i !== si) return;
+            const slots = document.querySelectorAll('.slot');
+            if (slots[si].hasChildNodes()) return;
+            slots[si].appendChild(selected.el);
+            selected.el.classList.remove('selected');
+            selected.el.onclick = null;
+            selected = null;
+            correct++;
+            if (correct === 4) document.getElementById('finishBtn').style.display = 'inline-block';
+        }
+
+        function startVideoStage() {
+            document.getElementById('audio1').pause();
+            document.getElementById('mainContainer').style.display = 'none';
+            const vScreen = document.getElementById('videoScreen');
+            const video = document.getElementById('memoryVideo');
+            vScreen.style.display = 'flex';
+            video.play();
+            
+            video.onended = () => {
+                vScreen.style.display = 'none';
+                launchCelebration();
+            };
+        }
+
+        function launchCelebration() {
+            const bDayAudio = document.getElementById('audioBirthday');
+            bDayAudio.volume = 0; // نبدأ بمستوى صوت صفر
+            bDayAudio.play();
+            
+            // تأثير الـ Fade-in: رفع الصوت تدريجياً خلال 3 ثواني
+            let vol = 0;
+            const fadeIn = setInterval(() => {
+                if (vol < 1) {
+                    vol += 0.05;
+                    bDayAudio.volume = vol.toFixed(2);
+                } else {
+                    clearInterval(fadeIn);
+                }
+            }, 150);
+
+            document.getElementById('finalScene').style.display = 'flex';
+            const end = Date.now() + (25 * 1000);
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#ff2d55', '#ffd700'], shapes: ['heart'] });
+                confetti({ particleCount: 5, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#ffffff', '#ff7eb3'], shapes: ['circle'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+    </script>
+</body>
+</html>
